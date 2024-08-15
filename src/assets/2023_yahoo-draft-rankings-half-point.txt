@@ -317,4 +317,3 @@ Rank	Player Name	Team	Position
 316	Ka'imi Fairbairn	HOU	K
 317	JaMycal Hasty	NE	RB
 318	Chad Ryland	NE	K
-
