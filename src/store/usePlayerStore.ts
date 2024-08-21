@@ -102,6 +102,9 @@ export const usePlayerStore = defineStore("player", {
             : undefined,
         };
       });
+
+      // Log mergedData to console
+      // console.log("Final mergedData:", this.mergedData);
     },
   },
 });

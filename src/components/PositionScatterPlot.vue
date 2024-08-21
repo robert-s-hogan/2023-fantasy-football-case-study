@@ -1,6 +1,7 @@
 <template>
   <div v-if="data && data.length" class="scatter-plot">
-    <Scatter :data="chartData" :options="options" />
+    <div ref="plotlyChart"></div>
+    <!-- Plotly chart container -->
   </div>
   <div v-else>
     <p>No position data available</p>
@@ -8,28 +9,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, computed } from "vue";
-import { Scatter } from "vue-chartjs";
-import {
-  Chart as ChartJS,
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Player, DetailedPlayer, MinimalPlayer } from "@/types/Player"; // Import Player, DetailedPlayer, MinimalPlayer types
-
-// Register necessary chart components for Chart.js
-ChartJS.register(
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend
-);
+import { defineComponent, PropType, onMounted, watch } from "vue";
+import Plotly from "plotly.js-dist";
+import { Player, DetailedPlayer, MinimalPlayer } from "@/types/Player";
 
 // Helper function to check if the player is a DetailedPlayer
 function isDetailedPlayer(player: Player): player is DetailedPlayer {
@@ -45,67 +27,58 @@ export default defineComponent({
       default: () => [], // Default to empty array
     },
   },
-  setup(props) {
-    // Compute chart data
-    const chartData = computed(() => {
-      if (!props.data.length) return null; // If no data, return null
-
-      return {
-        datasets: [
-          {
-            label: "Position Performance",
-            backgroundColor: "#42A5F5",
-            data: props.data.map((player: Player) => {
-              // Check if the player is DetailedPlayer or MinimalPlayer
-              const preseasonRank = (player as MinimalPlayer).rank ?? 0; // MinimalPlayer has rank
-              const eosRank = isDetailedPlayer(player)
-                ? player.eos_rank ?? 0
-                : 0; // DetailedPlayer has eos_rank
-
-              return {
-                x: preseasonRank, // Preseason rank
-                y: eosRank, // End-of-season rank
-              };
-            }),
-          },
-        ],
-      };
-    });
-
-    // Chart options
-    const options = {
-      responsive: true,
-      scales: {
-        x: {
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: "Preseason Rank",
-          },
-        },
-        y: {
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: "End-of-Season Rank",
-          },
-        },
+  mounted() {
+    // Render Plotly chart when the component is mounted
+    this.renderChart();
+  },
+  watch: {
+    // Re-render chart when `data` changes
+    data: {
+      immediate: true,
+      handler() {
+        this.renderChart();
       },
-    };
+    },
+  },
+  methods: {
+    renderChart() {
+      if (!this.data.length) return;
 
-    return {
-      chartData,
-      options,
-    };
+      // Prepare data for Plotly
+      const scatterData = [
+        {
+          x: this.data.map(
+            (player: Player) => (player as MinimalPlayer).rank ?? 0
+          ), // Preseason rank (x-axis)
+          y: this.data.map((player: Player) =>
+            isDetailedPlayer(player) ? player.eos_rank ?? 0 : 0
+          ), // End-of-season rank (y-axis)
+          mode: "markers", // Scatter plot with points
+          type: "scatter",
+          marker: { color: "#42A5F5" }, // Color for the points
+          name: "Position Performance",
+        },
+      ];
+
+      const layout = {
+        title: "Position Performance Scatter Plot",
+        xaxis: { title: "Preseason Rank", zeroline: false },
+        yaxis: { title: "End-of-Season Rank", zeroline: false },
+        margin: { t: 50, l: 50, r: 50, b: 50 },
+        height: 400,
+        responsive: true,
+      };
+
+      // Use Plotly to render the scatter plot
+      Plotly.newPlot(this.$refs.plotlyChart, scatterData, layout);
+    },
   },
 });
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .scatter-plot {
-  canvas {
-    width: 100% !important;
-    height: 400px !important;
-  }
+  width: 100%;
+  height: 400px;
 }
 </style>

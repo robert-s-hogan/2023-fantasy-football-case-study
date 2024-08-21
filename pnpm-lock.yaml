@@ -8,9 +8,6 @@ dependencies:
   axios:
     specifier: ^1.7.3
     version: 1.7.3
-  chart.js:
-    specifier: ^3.9.1
-    version: 3.9.1
   core-js:
     specifier: ^3.38.0
     version: 3.38.0
@@ -20,18 +17,15 @@ dependencies:
   pinia:
     specifier: ^2.2.2
     version: 2.2.2(typescript@5.1.6)(vue@3.4.38)
+  plotly.js-dist:
+    specifier: ^2.34.0
+    version: 2.34.0
   sass-loader:
     specifier: ^16.0.1
     version: 16.0.1(sass@1.77.8)(webpack@5.93.0)
   vue:
     specifier: ^3.4.38
     version: 3.4.38(typescript@5.1.6)
-  vue-chartjs:
-    specifier: ^5.3.1
-    version: 5.3.1(chart.js@3.9.1)(vue@3.4.38)
-  vue-demi:
-    specifier: ^0.14.10
-    version: 0.14.10(vue@3.4.38)
   vue-router:
     specifier: ^4.0.13
     version: 4.0.13(vue@3.4.38)
@@ -3208,10 +3202,6 @@ packages:
       supports-color: 7.2.0
     dev: true
 
-  /chart.js@3.9.1:
-    resolution: {integrity: sha512-Ro2JbLmvg83gXF5F4sniaQ+lTbSv18E+TIf2cOeiH1Iqd2PGFOtem+DUufMZsCJwFE7ywPOpfXFBwRTGq7dh6w==}
-    dev: false
-
   /chokidar@3.6.0:
     resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
     engines: {node: '>= 8.10.0'}
@@ -5903,6 +5893,10 @@ packages:
       find-up: 4.1.0
     dev: true
 
+  /plotly.js-dist@2.34.0:
+    resolution: {integrity: sha512-FZR9QT60vtE1ocdSIfop+zDIJEoy1lejwOvAjTSy+AmE4GZ//rW1nnIXwCRv4o9ejfzWq++lQMu6FJf9G+NtFg==}
+    dev: false
+
   /portfinder@1.0.32:
     resolution: {integrity: sha512-on2ZJVVDXRADWE6jnQaX0ioEylzgBpQk8r55NE4wjXW1ZxO+BgDlY6DXwj20i0V8eB4SenDQ00WEaxfiIQPcxg==}
     engines: {node: '>= 0.12.0'}
@@ -7255,16 +7249,6 @@ packages:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
     dev: true
-
-  /vue-chartjs@5.3.1(chart.js@3.9.1)(vue@3.4.38):
-    resolution: {integrity: sha512-rZjqcHBxKiHrBl0CIvcOlVEBwRhpWAVf6rDU3vUfa7HuSRmGtCslc0Oc8m16oAVuk0erzc1FCtH1VCriHsrz+A==}
-    peerDependencies:
-      chart.js: ^4.1.1
-      vue: ^3.0.0-0 || ^2.7.0
-    dependencies:
-      chart.js: 3.9.1
-      vue: 3.4.38(typescript@5.1.6)
-    dev: false
 
   /vue-demi@0.14.10(vue@3.4.38):
     resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==}

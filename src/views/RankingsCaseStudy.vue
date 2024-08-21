@@ -16,30 +16,42 @@
       <h2>Top Performers</h2>
       <p>Here are the players who most exceeded their preseason rankings:</p>
       <div class="chart-container">
-        <BarChart :data="topPerformers" />
+        <TopPerformersChart :data="topPerformers" />
+        <!-- Pass data to BarChart -->
       </div>
     </section>
 
-    <!-- Other sections... -->
+    <!-- Section: Underperformers -->
+    <section v-if="!loading && !error" class="underperformers section">
+      <h2>Underperformers</h2>
+      <p>These players fell short of their preseason expectations:</p>
+      <div class="chart-container">
+        <UnderperformersChart :data="underperformers" />
+        <!-- Pass data to UnderperformersChart -->
+      </div>
+    </section>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, computed } from "vue";
 import { usePlayerStore } from "@/store/usePlayerStore";
-import BarChart from "@/components/BarChart.vue";
+import TopPerformersChart from "@/components/TopPerformersChart.vue";
+import UnderperformersChart from "@/components/UnderperformersChart.vue"; // Import UnderperformersChart
 
 export default defineComponent({
   components: {
-    BarChart,
+    TopPerformersChart,
+    UnderperformersChart, // Register UnderperformersChart
   },
   setup() {
-    const playerStore = usePlayerStore();
+    const playerStore = usePlayerStore(); // Access player store
 
     onMounted(() => {
       playerStore.fetchData(); // Fetch the data on component mount
     });
 
+    // Filter for players with a positive rank difference (Top Performers)
     const topPerformers = computed(() =>
       playerStore.mergedData.filter(
         (player) =>
@@ -47,10 +59,19 @@ export default defineComponent({
       )
     );
 
+    // Filter for players with a negative rank difference (Underperformers)
+    const underperformers = computed(() =>
+      playerStore.mergedData.filter(
+        (player) =>
+          player.rank_difference !== undefined && player.rank_difference < 0
+      )
+    );
+
     return {
       loading: playerStore.loading,
       error: playerStore.error,
-      topPerformers, // Pass this data to the chart
+      topPerformers, // Pass this data to BarChart
+      underperformers, // Pass this data to UnderperformersChart
     };
   },
 });
@@ -58,7 +79,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .case-study {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: auto;
   padding: 20px;
 

@@ -13,7 +13,7 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["node", "http-proxy", "chart.js"] // Add 'chart.js' here
+    "types": ["node", "http-proxy"]
   },
   "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.vue"],
   "exclude": ["node_modules"]
