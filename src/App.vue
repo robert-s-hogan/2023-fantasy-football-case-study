@@ -1,48 +1,60 @@
 <template>
-  <div>
-    <h1>Fantasy Football Performance: EOS vs Preseason</h1>
-
-    <!-- Loading and Error States -->
-    <div v-if="loading">Loading data...</div>
-    <div v-if="error">{{ error }}</div>
-
-    <!-- Display Player Cards -->
-    <div v-if="!loading && !error" class="player-cards">
-      <PlayerCard
-        v-for="player in mergedData"
-        :player="player"
-        :key="player.name"
-      />
-    </div>
+  <div id="app">
+    <router-view />
+    <!-- This will render the HomePage or RankingsCaseStudy depending on the route -->
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { usePlayerStore } from "./store/usePlayerStore";
-import PlayerCard from "./components/PlayerCard.vue";
-
-export default defineComponent({
-  components: {
-    PlayerCard,
-  },
-  setup() {
-    const playerStore = usePlayerStore();
-
-    // Fetch data when the component is mounted
-    playerStore.fetchData();
-
-    return {
-      ...playerStore,
-    };
-  },
-});
+export default {
+  name: "App",
+};
 </script>
 
-<style>
-.player-cards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+<style lang="scss" scoped>
+// Define global color variables first
+$background-color: #f5f5f5;
+$text-color: #333;
+$primary-color: #3498db;
+$link-color: $primary-color;
+
+#app {
+  text-align: center;
+  padding: 20px;
+  font-family: "Arial", sans-serif;
+
+  // Set up default background and text color
+  background-color: $background-color;
+  color: $text-color;
+
+  // Set up media query for responsiveness
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Arial", sans-serif;
+  background-color: $background-color;
+  color: $text-color;
+
+  // Set a default font size for the body
+  font-size: 16px;
+
+  // Ensure that text rendering is optimized
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Add a global link style
+a {
+  color: $link-color;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 </style>

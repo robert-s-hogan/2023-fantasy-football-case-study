@@ -1,3 +1,4 @@
+// Define the statistics for passing, rushing, receiving, and fumbles
 interface PassingStats {
   yards: number;
   touchdowns: number;
@@ -24,6 +25,7 @@ interface FumbleStats {
   lost: number;
 }
 
+// DetailedPlayer type with all stats fields
 export interface DetailedPlayer {
   name: string;
   team: string;
@@ -31,20 +33,22 @@ export interface DetailedPlayer {
   games_played: number;
   bye_week: number;
   fan_points: number;
-  passing: PassingStats;
-  rushing: RushingStats;
-  receiving: ReceivingStats;
-  fumbles: FumbleStats;
-  eos_rank?: number; // Add eos_rank as optional
-  rank_difference?: number; // Already exists as optional
+  passing?: PassingStats; // Making these optional since not every player has all stats
+  rushing?: RushingStats;
+  receiving?: ReceivingStats;
+  fumbles?: FumbleStats;
+  eos_rank?: number; // Optional field for end-of-season rank
+  rank_difference?: number; // Optional field to calculate the difference between draft and EOS ranks
 }
 
+// MinimalPlayer type for players without detailed stats
 export interface MinimalPlayer {
-  rank?: number;
+  rank?: number; // Optional draft rank
   name: string;
   team: string;
   position: string;
-  rank_difference?: number; // Add this optional field
+  rank_difference?: number; // Optional field for rank difference
 }
 
+// A union type to represent either DetailedPlayer or MinimalPlayer
 export type Player = DetailedPlayer | MinimalPlayer;

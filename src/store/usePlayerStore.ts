@@ -36,6 +36,7 @@ export const usePlayerStore = defineStore("player", {
       this.error = null;
 
       try {
+        // Using Promise.all to fetch both rankings and EOS data concurrently
         const [rankingsResponse, eosResponse] = await Promise.all([
           axios.get<Player[]>("http://127.0.0.1:8001/rankings"),
           axios.get<Player[]>("http://127.0.0.1:8001/eos_results"),
@@ -44,23 +45,27 @@ export const usePlayerStore = defineStore("player", {
         this.draftRankings = rankingsResponse.data;
         this.eosResults = eosResponse.data;
 
-        this.assignEosRanks();
-        this.mergeData();
-      } catch (error) {
-        this.error = "Failed to fetch data.";
-        console.error(error);
+        this.assignEosRanks(); // Assign end-of-season ranks
+        this.mergeData(); // Merge draft and end-of-season data
+      } catch (error: any) {
+        this.error =
+          error.response?.status === 404
+            ? "Data not found."
+            : "Failed to fetch data.";
+        console.error("Error fetching data:", error.message);
       } finally {
         this.loading = false;
       }
     },
 
+    // Assigning EOS rank based on fan_points for DetailedPlayers
     assignEosRanks() {
-      // Sort only the DetailedPlayer based on fan_points
+      // Sort DetailedPlayers by fan_points in descending order
       this.eosResults
         .filter(isDetailedPlayer)
         .sort((a, b) => b.fan_points - a.fan_points);
 
-      // Assign eos_rank to only DetailedPlayers
+      // Assign eos_rank to DetailedPlayers only
       this.eosResults.forEach((player, index) => {
         if (isDetailedPlayer(player)) {
           player.eos_rank = index + 1;
@@ -68,6 +73,7 @@ export const usePlayerStore = defineStore("player", {
       });
     },
 
+    // Merging draftRankings with eosResults based on player name
     mergeData() {
       this.mergedData = this.draftRankings.map((draftPlayer) => {
         const eosPlayer = this.eosResults.find(
@@ -80,16 +86,17 @@ export const usePlayerStore = defineStore("player", {
             eos_rank: eosPlayer.eos_rank,
             fan_points: eosPlayer.fan_points,
             rank_difference:
-              isMinimalPlayer(draftPlayer) && eosPlayer.eos_rank
-                ? draftPlayer.rank! - eosPlayer.eos_rank
+              isMinimalPlayer(draftPlayer) && eosPlayer.eos_rank !== undefined
+                ? (draftPlayer.rank ?? 0) - eosPlayer.eos_rank
                 : undefined,
           };
         }
 
+        // Handle cases where no matching EOS data is found
         return {
           ...draftPlayer,
-          eos_rank: undefined, // Set eos_rank to undefined instead of null
-          fan_points: 0,
+          eos_rank: undefined, // Set eos_rank to undefined if not found
+          fan_points: 0, // Default fan points to 0
           rank_difference: isMinimalPlayer(draftPlayer)
             ? draftPlayer.rank
             : undefined,
