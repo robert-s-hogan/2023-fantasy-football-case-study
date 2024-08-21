@@ -8,6 +8,7 @@
       expectations.
     </p>
 
+    <!-- Loading and error states -->
     <div v-if="loading">Loading data...</div>
     <div v-if="error">{{ error }}</div>
 
@@ -17,7 +18,6 @@
       <p>Here are the players who most exceeded their preseason rankings:</p>
       <div class="chart-container">
         <TopPerformersChart :data="topPerformers" />
-        <!-- Pass data to BarChart -->
       </div>
     </section>
 
@@ -27,7 +27,18 @@
       <p>These players fell short of their preseason expectations:</p>
       <div class="chart-container">
         <UnderperformersChart :data="underperformers" />
-        <!-- Pass data to UnderperformersChart -->
+      </div>
+    </section>
+
+    <!-- Section: Biggest Rank Movers -->
+    <section v-if="!loading && !error" class="rank-movers section">
+      <h2>Biggest Rank Movers</h2>
+      <p>
+        These players experienced the largest rank movement, positive or
+        negative:
+      </p>
+      <div class="chart-container">
+        <RankMoversChart :data="rankMovers" />
       </div>
     </section>
   </div>
@@ -37,12 +48,14 @@
 import { defineComponent, onMounted, computed } from "vue";
 import { usePlayerStore } from "@/store/usePlayerStore";
 import TopPerformersChart from "@/components/TopPerformersChart.vue";
-import UnderperformersChart from "@/components/UnderperformersChart.vue"; // Import UnderperformersChart
+import UnderperformersChart from "@/components/UnderperformersChart.vue";
+import RankMoversChart from "@/components/RankMoversChart.vue"; // Import RankMoversChart
 
 export default defineComponent({
   components: {
     TopPerformersChart,
-    UnderperformersChart, // Register UnderperformersChart
+    UnderperformersChart,
+    RankMoversChart, // Register RankMoversChart
   },
   setup() {
     const playerStore = usePlayerStore(); // Access player store
@@ -67,11 +80,22 @@ export default defineComponent({
       )
     );
 
+    // Filter for players with the largest rank movement (positive or negative)
+    const rankMovers = computed(() =>
+      playerStore.mergedData
+        .filter((player) => player.rank_difference !== undefined)
+        .sort(
+          (a, b) =>
+            Math.abs(b.rank_difference ?? 0) - Math.abs(a.rank_difference ?? 0)
+        )
+    );
+
     return {
       loading: playerStore.loading,
       error: playerStore.error,
-      topPerformers, // Pass this data to BarChart
+      topPerformers, // Pass this data to TopPerformersChart
       underperformers, // Pass this data to UnderperformersChart
+      rankMovers, // Pass this data to RankMoversChart
     };
   },
 });

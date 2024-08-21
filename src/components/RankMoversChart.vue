@@ -8,7 +8,7 @@
 <script lang="ts">
 import { defineComponent, PropType, onMounted, watch } from "vue";
 import Plotly from "plotly.js-dist"; // Import Plotly.js
-import { Player } from "@/types/Player"; // Import Player type
+import { Player, MinimalPlayer, DetailedPlayer } from "@/types/Player"; // Import Player types
 
 export default defineComponent({
   name: "RankMoversChart",
@@ -31,14 +31,36 @@ export default defineComponent({
     },
   },
   methods: {
+    // Type guard to check if a player is MinimalPlayer
+    isMinimalPlayer(player: Player): player is MinimalPlayer {
+      return (player as MinimalPlayer).rank !== undefined;
+    },
+    // Type guard to check if a player is DetailedPlayer
+    isDetailedPlayer(player: Player): player is DetailedPlayer {
+      return (player as DetailedPlayer).eos_rank !== undefined;
+    },
     renderChart() {
       if (!this.data.length) return; // No data, no chart
+
+      // Filter players who have both a preseason rank and end-of-season rank
+      const filteredPlayers = this.data.filter(
+        (player: Player) =>
+          this.isMinimalPlayer(player) && this.isDetailedPlayer(player)
+      );
+
+      // Sort players by rank_difference in descending order and take top 25
+      const topPlayers = [...filteredPlayers]
+        .sort(
+          (a, b) =>
+            Math.abs(b.rank_difference ?? 0) - Math.abs(a.rank_difference ?? 0) // Handle undefined rank_difference
+        )
+        .slice(0, 25); // Take the top 25 players based on the biggest rank movement
 
       // Prepare data for Plotly
       const chartData = [
         {
-          x: this.data.map((player: Player) => player.name), // Player names (x-axis)
-          y: this.data.map((player: Player) => player.rank_difference), // Rank differences (y-axis)
+          x: topPlayers.map((player: Player) => player.name), // Player names (x-axis)
+          y: topPlayers.map((player: Player) => player.rank_difference ?? 0), // Rank differences (y-axis)
           type: "bar",
           marker: {
             color: "#66BB6A", // Bar color
@@ -49,11 +71,15 @@ export default defineComponent({
 
       // Chart layout options
       const layout = {
-        title: "Biggest Rank Movers",
-        xaxis: { title: "Player Names" },
+        title: "Biggest Rank Movers (Top 25)",
+        xaxis: {
+          title: "Player Names",
+          tickangle: -45, // Rotate labels
+          automargin: true, // Adjust margins dynamically
+        },
         yaxis: { title: "Rank Difference" },
         height: 400,
-        margin: { t: 50, l: 50, r: 50, b: 50 },
+        margin: { t: 50, l: 50, r: 50, b: 100 }, // Increase bottom margin for labels
         responsive: true,
       };
 
