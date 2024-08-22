@@ -1,37 +1,58 @@
 <template>
-  <div class="home-page">
-    <h1>Welcome to the Fantasy Football Analysis</h1>
+  <div class="home-page container mx-auto py-10">
+    <!-- Main Heading -->
+    <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">
+      Welcome to the Fantasy Football Analysis
+    </h1>
 
     <!-- Link to Case Study -->
-    <router-link to="/case-study" class="case-study-link">
+    <router-link
+      to="/case-study"
+      class="block text-center text-blue-500 hover:text-blue-700 font-semibold text-xl mb-10 transition duration-200"
+    >
       View 2023 Case Study
     </router-link>
 
     <!-- Search Bar -->
-    <div class="search-section">
+    <div class="search-section mb-8 flex justify-center">
       <input
         type="text"
         v-model="searchQuery"
         placeholder="Search for players by name, team, or position..."
-        class="search-input"
+        class="search-input w-full max-w-md px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
     </div>
 
     <!-- Filtered Players -->
-    <div v-if="filteredPlayers.length > 0" class="player-list">
+    <div
+      v-if="filteredPlayers.length > 0"
+      class="player-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
+    >
+      <!-- Player Cards -->
       <div
         v-for="player in filteredPlayers"
         :key="player.name"
-        class="player-card"
+        class="player-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300"
       >
-        <h3>{{ player.name }}</h3>
-        <p><strong>Team:</strong> {{ player.team }}</p>
-        <p><strong>Position:</strong> {{ player.position }}</p>
-        <p><strong>Rank Difference:</strong> {{ player.rank_difference }}</p>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">
+          {{ player.name }}
+        </h3>
+        <p class="text-gray-700 mb-1">
+          <strong>Team:</strong> {{ player.team }}
+        </p>
+        <p class="text-gray-700 mb-1">
+          <strong>Position:</strong> {{ player.position }}
+        </p>
+        <p class="text-gray-700">
+          <strong>Rank Difference:</strong> {{ player.rank_difference }}
+        </p>
       </div>
     </div>
 
-    <div v-else class="no-results">No players found matching your search.</div>
+    <!-- No Results -->
+    <div v-else class="no-results text-center text-gray-600 mt-8">
+      No players found matching your search.
+    </div>
   </div>
 </template>
 
@@ -71,72 +92,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.home-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-
-  h1 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  .case-study-link {
-    display: block;
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 1.5em;
-    color: #3498db;
-    text-decoration: none;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
-  .search-section {
-    text-align: center;
-    margin-bottom: 20px;
-
-    .search-input {
-      width: 50%;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 1.1em;
-    }
-  }
-
-  .player-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-
-    .player-card {
-      background-color: #f9f9f9;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      flex: 1 1 calc(30% - 20px); /* 3 columns with gap */
-
-      h3 {
-        margin-bottom: 10px;
-        color: #333;
-      }
-
-      p {
-        margin: 5px 0;
-        color: #555;
-      }
-    }
-  }
-
-  .no-results {
-    text-align: center;
-    font-size: 1.2em;
-    color: #e74c3c;
-  }
-}
-</style>

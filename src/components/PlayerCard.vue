@@ -46,17 +46,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.player-card {
-  border: 1px solid #ccc;
-  padding: 15px;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-  width: 250px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.player-card h2 {
-  margin: 0 0 10px 0;
-}
-</style>

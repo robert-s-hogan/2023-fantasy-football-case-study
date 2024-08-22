@@ -1,43 +1,102 @@
 <template>
-  <div class="case-study">
-    <h1>2023 Fantasy Football Rankings Case Study</h1>
-    <p class="introduction">
+  <div class="case-study max-w-7xl mx-auto p-8">
+    <!-- Main Heading -->
+    <h1 class="text-4xl font-bold text-center text-gray-800 mb-10">
+      2023 Fantasy Football Rankings Case Study
+    </h1>
+
+    <!-- Introduction -->
+    <p
+      class="introduction text-lg text-center text-gray-600 mb-12 leading-relaxed"
+    >
       This case study compares the preseason draft rankings with the
       end-of-season (EOS) results. The data highlights the top performers,
       biggest risers, and the players who underperformed their preseason
       expectations.
     </p>
 
+    <!-- Data Overview Section -->
+    <section class="data-overview mb-12">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+        Data Overview and Explanation of Metrics
+      </h2>
+      <p class="text-gray-700 mb-4">
+        The rankings used in this case study are sourced from
+        <strong>Yahoo Fantasy Football</strong>. The preseason rankings reflect
+        player draft order, expectations based on player form, team situation,
+        and expert analysis.
+      </p>
+      <p class="text-gray-700 mb-6">
+        The end-of-season (EOS) rankings represent player performance based on
+        total points scored and positional rankings at the end of the 2023
+        season.
+      </p>
+
+      <h3 class="text-xl font-semibold text-gray-800 mb-4">Key Metrics</h3>
+      <ul class="list-disc list-inside text-gray-700">
+        <li class="mb-2">
+          <strong>Rank Difference:</strong> The difference between a player’s
+          preseason draft ranking and their EOS ranking. A positive number means
+          a player exceeded expectations, while a negative number means they
+          underperformed.
+        </li>
+        <li class="mb-2">
+          <strong>Games Played:</strong> The total number of games a player
+          participated in during the 2023 season, which contextualizes
+          performance (e.g., missing games due to injuries or suspension).
+        </li>
+        <li class="mb-2">
+          <strong>Points Per Game (PPG):</strong> A key metric to standardize
+          player performance across different games played.
+        </li>
+        <li class="mb-2">
+          <strong>Positional Context:</strong> We also compare players within
+          their position (e.g., QB, RB, WR, TE) to better understand their rank
+          movements.
+        </li>
+      </ul>
+    </section>
+
     <!-- Loading and error states -->
-    <div v-if="loading">Loading data...</div>
-    <div v-if="error">{{ error }}</div>
+    <div v-if="loading" class="status-message text-center text-gray-600">
+      Loading data...
+    </div>
+    <div v-if="error" class="status-message error text-center text-red-500">
+      {{ error }}
+    </div>
 
     <!-- Section: Top Performers -->
-    <section v-if="!loading && !error" class="top-performers section">
-      <h2>Top Performers</h2>
-      <p>Here are the players who most exceeded their preseason rankings:</p>
-      <div class="chart-container">
+    <section v-if="!loading && !error" class="mb-12">
+      <h2 class="text-2xl font-semibold text-green-600 mb-4">Top Performers</h2>
+      <p class="text-gray-700 mb-6">
+        Here are the players who most exceeded their preseason rankings:
+      </p>
+      <div class="chart-container bg-white p-6 rounded-lg shadow-lg">
         <TopPerformersChart :data="topPerformers" />
       </div>
     </section>
 
     <!-- Section: Underperformers -->
-    <section v-if="!loading && !error" class="underperformers section">
-      <h2>Underperformers</h2>
-      <p>These players fell short of their preseason expectations:</p>
-      <div class="chart-container">
+    <section v-if="!loading && !error" class="mb-12">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Underperformers</h2>
+      <p class="text-gray-700 mb-6">
+        These players fell short of their preseason expectations:
+      </p>
+      <div class="chart-container bg-white p-6 rounded-lg shadow-lg">
         <UnderperformersChart :data="underperformers" />
       </div>
     </section>
 
     <!-- Section: Biggest Rank Movers -->
-    <section v-if="!loading && !error" class="rank-movers section">
-      <h2>Biggest Rank Movers</h2>
-      <p>
+    <section v-if="!loading && !error">
+      <h2 class="text-2xl font-semibold text-yellow-600 mb-4">
+        Biggest Rank Movers
+      </h2>
+      <p class="text-gray-700 mb-6">
         These players experienced the largest rank movement, positive or
         negative:
       </p>
-      <div class="chart-container">
+      <div class="chart-container bg-white p-6 rounded-lg shadow-lg">
         <RankMoversChart :data="rankMovers" />
       </div>
     </section>
@@ -100,48 +159,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.case-study {
-  max-width: 1400px;
-  margin: auto;
-  padding: 20px;
-
-  h1 {
-    text-align: center;
-    margin-bottom: 40px;
-    font-size: 2.5em;
-    color: #333;
-  }
-
-  .introduction {
-    font-size: 1.2em;
-    text-align: center;
-    margin-bottom: 40px;
-    color: #555;
-  }
-
-  .section {
-    margin-bottom: 60px;
-
-    h2 {
-      font-size: 2em;
-      margin-bottom: 20px;
-      color: #2c3e50;
-    }
-
-    p {
-      font-size: 1.1em;
-      color: #34495e;
-    }
-
-    .chart-container {
-      margin-top: 20px;
-      padding: 20px;
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-  }
-}
-</style>

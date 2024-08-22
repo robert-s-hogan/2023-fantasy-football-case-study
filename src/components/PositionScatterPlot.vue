@@ -75,10 +75,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.scatter-plot {
-  width: 100%;
-  height: 400px;
-}
-</style>

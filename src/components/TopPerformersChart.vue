@@ -101,10 +101,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.plotly-chart {
-  width: 100%;
-  height: 400px;
-}
-</style>
