@@ -13,6 +13,28 @@
       View 2023 Case Study
     </router-link>
 
+    <!-- Filter Buttons -->
+    <div class="filters flex justify-center space-x-4 mb-8">
+      <button
+        @click="fetchPerformers('best')"
+        class="bg-blue-500 text-white px-4 py-2 rounded"
+      >
+        Best Performers
+      </button>
+      <button
+        @click="fetchPerformers('worst')"
+        class="bg-red-500 text-white px-4 py-2 rounded"
+      >
+        Worst Performers
+      </button>
+      <button
+        @click="fetchPerformers('actual')"
+        class="bg-green-500 text-white px-4 py-2 rounded"
+      >
+        Closest to Actual
+      </button>
+    </div>
+
     <!-- Search Bar -->
     <div class="search-section mb-8 flex justify-center">
       <input
@@ -23,9 +45,17 @@
       />
     </div>
 
+    <!-- Display loading state -->
+    <div v-if="loading" class="text-center">Loading players...</div>
+
+    <!-- Display error state -->
+    <div v-if="error" class="text-center text-red-500">
+      {{ error }}
+    </div>
+
     <!-- Filtered Players -->
     <div
-      v-if="filteredPlayers.length > 0"
+      v-if="filteredPlayers.length > 0 && !loading"
       class="player-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
     >
       <!-- Player Cards -->
@@ -50,7 +80,7 @@
     </div>
 
     <!-- No Results -->
-    <div v-else class="no-results text-center text-gray-600 mt-8">
+    <div v-else-if="!loading" class="no-results text-center text-gray-600 mt-8">
       No players found matching your search.
     </div>
   </div>
@@ -63,17 +93,18 @@ import { usePlayerStore } from "@/store/usePlayerStore"; // Import your Pinia st
 export default defineComponent({
   name: "HomePage",
   setup() {
-    const playerStore = usePlayerStore();
+    const playerStore = usePlayerStore(); // Use the Pinia store
+    const searchQuery = ref("");
+
+    // Function to fetch players based on the type (best, worst, actual)
+    const fetchPerformers = (type: string) => {
+      playerStore.fetchData(type);
+    };
 
     // Trigger fetching of data when the component is mounted
     onMounted(() => {
-      if (playerStore.mergedData.length === 0) {
-        // Only fetch if data isn't already available
-        playerStore.fetchData();
-      }
+      fetchPerformers("best"); // Default to fetching best performers
     });
-
-    const searchQuery = ref("");
 
     // Computed property to filter players based on search query
     const filteredPlayers = computed(() => {
@@ -88,6 +119,9 @@ export default defineComponent({
     return {
       searchQuery,
       filteredPlayers,
+      loading: computed(() => playerStore.loading), // Bind loading state
+      error: computed(() => playerStore.error), // Bind error state
+      fetchPerformers, // Bind function for fetching performers
     };
   },
 });
