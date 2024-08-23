@@ -1,8 +1,9 @@
 <template>
-  <div v-if="data && data.length" class="scatter-plot">
-    <div ref="plotlyChart"></div>
+  <!-- Conditional rendering based on data availability -->
+  <div v-if="data && data.length" class="mt-5">
+    <div ref="plotlyChart" class="h-96"></div>
   </div>
-  <div v-else>
+  <div v-else class="text-center text-gray-500 mt-5">
     <p>No position data available</p>
   </div>
 </template>
@@ -10,8 +11,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch } from "vue";
 import Plotly from "plotly.js-dist";
-import { PropType } from "vue"; // Ensure PropType is imported
-import { usePlayerStore } from "@/store/usePlayerStore"; // Pinia store
+import { PropType } from "vue";
 import { Player, DetailedPlayer, MinimalPlayer } from "@/types/Player";
 
 // Helper function to check if the player is a MinimalPlayer
@@ -28,14 +28,12 @@ export default defineComponent({
   name: "PositionScatterPlot",
   props: {
     data: {
-      type: Array as PropType<Player[]>, // Correctly define the prop type
+      type: Array as PropType<Player[]>,
       required: true,
-      default: () => [], // Default to an empty array
     },
   },
   setup(props) {
     const plotlyChart = ref<HTMLDivElement | null>(null);
-    const playerStore = usePlayerStore(); // Access Pinia store
 
     // Render Plotly chart
     const renderChart = () => {
@@ -84,14 +82,7 @@ export default defineComponent({
 
     return {
       plotlyChart,
-      playerStore,
     };
   },
 });
 </script>
-
-<style scoped>
-.scatter-plot {
-  margin-top: 20px;
-}
-</style>

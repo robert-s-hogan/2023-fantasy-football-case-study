@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "axios": "^1.7.3",
-    "core-js": "^3.38.0",
-    "oauth": "^0.10.0",
+    "core-js": "^3.38.1",
     "pinia": "^2.2.2",
     "plotly.js-dist": "^2.34.0",
     "vue": "^3.4.38",
@@ -18,7 +17,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
-    "@babel/eslint-parser": "^7.12.16",
     "@types/http-proxy": "^1.17.15",
     "@types/node": "^18.19.45",
     "@typescript-eslint/eslint-plugin": "^8.1.0",
@@ -32,7 +30,6 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.9.0",
     "eslint-plugin-vue": "^9.27.0",
-    "eslint-webpack-plugin": "^4.2.0",
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
     "typescript": "^5.1.6",

@@ -17,38 +17,6 @@
         <strong>Fan Points:</strong> {{ player.fan_points }}
       </p>
     </div>
-
-    <!-- Debugging the Rank Difference -->
-    <p class="text-gray-700 mt-4">
-      <strong>Rank Difference:</strong>
-      {{ player.rank_difference }}
-      <!-- Log this value for debugging -->
-    </p>
-
-    <!-- Ensure that Rank Difference is only shown when it is available -->
-    <p v-if="player.rank_difference !== undefined" class="mt-4">
-      <strong class="text-gray-700">Rank Difference:</strong>
-
-      <!-- Add console log for the rank difference for further debugging -->
-      {{ console.log("Rank Difference:", player.rank_difference) }}
-
-      <!-- Check positive, negative, and zero differences -->
-      <span
-        v-if="player.rank_difference > 0"
-        class="text-green-600 font-semibold"
-      >
-        +{{ player.rank_difference }}
-      </span>
-      <span
-        v-else-if="player.rank_difference < 0"
-        class="text-red-600 font-semibold"
-      >
-        {{ player.rank_difference }}
-      </span>
-      <span v-else class="text-gray-600 font-semibold">
-        {{ player.rank_difference }}
-      </span>
-    </p>
   </div>
 </template>
 

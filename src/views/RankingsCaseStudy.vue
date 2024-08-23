@@ -57,49 +57,59 @@
       </ul>
     </section>
 
-    <!-- Loading and error states -->
+    <!-- Loading and Error States -->
     <div v-if="loading" class="status-message text-center text-gray-600">
       Loading data...
     </div>
-    <div v-if="error" class="status-message error text-center text-red-500">
+    <div
+      v-else-if="error"
+      class="status-message error text-center text-red-500"
+    >
       {{ error }}
     </div>
 
-    <!-- Section: Top Performers -->
-    <section v-if="!loading && !error" class="mb-12">
-      <h2 class="text-2xl font-semibold text-green-600 mb-4">Top Performers</h2>
-      <p class="text-gray-700 mb-6">
-        Here are the players who most exceeded their preseason rankings:
-      </p>
-      <div class="chart-container bg-white p-6 rounded-lg shadow-lg">
-        <TopPerformersChart :data="topPerformers" />
-      </div>
-    </section>
+    <!-- Main Sections, Only Shown if No Loading or Error -->
+    <div v-else>
+      <!-- Section: Top Performers -->
+      <section class="mb-12">
+        <h2 class="text-2xl font-semibold text-green-600 mb-4">
+          Top Performers
+        </h2>
+        <p class="text-gray-700 mb-6">
+          Here are the players who most exceeded their preseason rankings:
+        </p>
+        <div class="chart-container bg-white p-6 rounded-lg shadow-lg">
+          <TopPerformersChart :data="topPerformers" />
+        </div>
+      </section>
 
-    <!-- Section: Underperformers -->
-    <section v-if="!loading && !error" class="mb-12">
-      <h2 class="text-2xl font-semibold text-red-600 mb-4">Underperformers</h2>
-      <p class="text-gray-700 mb-6">
-        These players fell short of their preseason expectations:
-      </p>
-      <div class="chart-container bg-white p-6 rounded-lg shadow-lg">
-        <UnderperformersChart :data="underperformers" />
-      </div>
-    </section>
+      <!-- Section: Underperformers -->
+      <section class="mb-12">
+        <h2 class="text-2xl font-semibold text-red-600 mb-4">
+          Underperformers
+        </h2>
+        <p class="text-gray-700 mb-6">
+          These players fell short of their preseason expectations:
+        </p>
+        <div class="chart-container bg-white p-6 rounded-lg shadow-lg">
+          <UnderperformersChart :data="underperformers" />
+        </div>
+      </section>
 
-    <!-- Section: Biggest Rank Movers -->
-    <section v-if="!loading && !error">
-      <h2 class="text-2xl font-semibold text-yellow-600 mb-4">
-        Biggest Rank Movers
-      </h2>
-      <p class="text-gray-700 mb-6">
-        These players experienced the largest rank movement, positive or
-        negative:
-      </p>
-      <div class="chart-container bg-white p-6 rounded-lg shadow-lg">
-        <RankMoversChart :data="rankMovers" />
-      </div>
-    </section>
+      <!-- Section: Biggest Rank Movers -->
+      <section>
+        <h2 class="text-2xl font-semibold text-yellow-600 mb-4">
+          Biggest Rank Movers
+        </h2>
+        <p class="text-gray-700 mb-6">
+          These players experienced the largest rank movement, positive or
+          negative:
+        </p>
+        <div class="chart-container bg-white p-6 rounded-lg shadow-lg">
+          <RankMoversChart :data="rankMovers" />
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -108,22 +118,22 @@ import { defineComponent, onMounted, computed } from "vue";
 import { usePlayerStore } from "@/store/usePlayerStore";
 import TopPerformersChart from "@/components/TopPerformersChart.vue";
 import UnderperformersChart from "@/components/UnderperformersChart.vue";
-import RankMoversChart from "@/components/RankMoversChart.vue"; // Import RankMoversChart
+import RankMoversChart from "@/components/RankMoversChart.vue";
 
 export default defineComponent({
   components: {
     TopPerformersChart,
     UnderperformersChart,
-    RankMoversChart, // Register RankMoversChart
+    RankMoversChart,
   },
   setup() {
-    const playerStore = usePlayerStore(); // Access player store
+    const playerStore = usePlayerStore();
 
     onMounted(() => {
-      playerStore.fetchData(); // Fetch the data on component mount
+      playerStore.fetchData();
     });
 
-    // Filter for players with a positive rank difference (Top Performers)
+    // Computed properties for filtered data
     const topPerformers = computed(() =>
       playerStore.mergedData.filter(
         (player) =>
@@ -131,7 +141,6 @@ export default defineComponent({
       )
     );
 
-    // Filter for players with a negative rank difference (Underperformers)
     const underperformers = computed(() =>
       playerStore.mergedData.filter(
         (player) =>
@@ -139,7 +148,6 @@ export default defineComponent({
       )
     );
 
-    // Filter for players with the largest rank movement (positive or negative)
     const rankMovers = computed(() =>
       playerStore.mergedData
         .filter((player) => player.rank_difference !== undefined)
@@ -152,9 +160,9 @@ export default defineComponent({
     return {
       loading: playerStore.loading,
       error: playerStore.error,
-      topPerformers, // Pass this data to TopPerformersChart
-      underperformers, // Pass this data to UnderperformersChart
-      rankMovers, // Pass this data to RankMoversChart
+      topPerformers,
+      underperformers,
+      rankMovers,
     };
   },
 });

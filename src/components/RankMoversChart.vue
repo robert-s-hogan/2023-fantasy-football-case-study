@@ -1,14 +1,19 @@
 <template>
-  <div class="rank-movers-chart">
-    <div ref="plotlyChart"></div>
-    <!-- Plotly chart container -->
+  <!-- Chart container with TailwindCSS -->
+  <div class="mt-6">
+    <div ref="plotlyChart" class="h-96"></div>
+  </div>
+
+  <!-- Fallback message if no data -->
+  <div v-if="!data || !data.length" class="text-center text-gray-500 mt-6">
+    No data available
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, onMounted, watch } from "vue";
-import Plotly from "plotly.js-dist"; // Import Plotly.js
-import { Player, MinimalPlayer, DetailedPlayer } from "@/types/Player"; // Import Player types
+import { defineComponent, ref, onMounted, watch, PropType } from "vue"; // Ensure PropType is imported
+import Plotly from "plotly.js-dist";
+import { Player, MinimalPlayer, DetailedPlayer } from "@/types/Player";
 
 export default defineComponent({
   name: "RankMoversChart",
@@ -18,74 +23,76 @@ export default defineComponent({
       required: true,
     },
   },
-  mounted() {
-    this.renderChart(); // Render the chart when component is mounted
-  },
-  watch: {
-    // Re-render the chart whenever the data prop changes
-    data: {
-      immediate: true,
-      handler() {
-        this.renderChart();
-      },
-    },
-  },
-  methods: {
-    // Type guard to check if a player is MinimalPlayer
-    isMinimalPlayer(player: Player): player is MinimalPlayer {
-      return (player as MinimalPlayer).rank !== undefined;
-    },
-    // Type guard to check if a player is DetailedPlayer
-    isDetailedPlayer(player: Player): player is DetailedPlayer {
-      return (player as DetailedPlayer).eos_rank !== undefined;
-    },
-    renderChart() {
-      if (!this.data.length) return; // No data, no chart
+  setup(props) {
+    const plotlyChart = ref<HTMLDivElement | null>(null);
 
-      // Filter players who have both a preseason rank and end-of-season rank
-      const filteredPlayers = this.data.filter(
-        (player: Player) =>
-          this.isMinimalPlayer(player) && this.isDetailedPlayer(player)
+    // Helper functions for type guards
+    const isMinimalPlayer = (player: Player): player is MinimalPlayer => {
+      return (player as MinimalPlayer).rank !== undefined;
+    };
+
+    const isDetailedPlayer = (player: Player): player is DetailedPlayer => {
+      return (player as DetailedPlayer).eos_rank !== undefined;
+    };
+
+    // Function to render the chart
+    const renderChart = () => {
+      if (!props.data.length || !plotlyChart.value) return;
+
+      const filteredPlayers = props.data.filter(
+        (player: Player) => isMinimalPlayer(player) && isDetailedPlayer(player)
       );
 
-      // Sort players by rank_difference in descending order and take top 25
       const topPlayers = [...filteredPlayers]
         .sort(
           (a, b) =>
-            Math.abs(b.rank_difference ?? 0) - Math.abs(a.rank_difference ?? 0) // Handle undefined rank_difference
+            Math.abs(b.rank_difference ?? 0) - Math.abs(a.rank_difference ?? 0)
         )
-        .slice(0, 25); // Take the top 25 players based on the biggest rank movement
+        .slice(0, 25); // Top 25 players
 
-      // Prepare data for Plotly
       const chartData = [
         {
-          x: topPlayers.map((player: Player) => player.name), // Player names (x-axis)
-          y: topPlayers.map((player: Player) => player.rank_difference ?? 0), // Rank differences (y-axis)
+          x: topPlayers.map((player: Player) => player.name),
+          y: topPlayers.map((player: Player) => player.rank_difference ?? 0),
           type: "bar",
-          marker: {
-            color: "#66BB6A", // Bar color
-          },
+          marker: { color: "#66BB6A" },
           name: "Biggest Rank Movers",
         },
       ];
 
-      // Chart layout options
       const layout = {
         title: "Biggest Rank Movers (Top 25)",
         xaxis: {
           title: "Player Names",
-          tickangle: -45, // Rotate labels
-          automargin: true, // Adjust margins dynamically
+          tickangle: -45,
+          automargin: true,
         },
         yaxis: { title: "Rank Difference" },
         height: 400,
-        margin: { t: 50, l: 50, r: 50, b: 100 }, // Increase bottom margin for labels
+        margin: { t: 50, l: 50, r: 50, b: 100 },
         responsive: true,
       };
 
-      // Use Plotly to render the chart
-      Plotly.newPlot(this.$refs.plotlyChart, chartData, layout);
-    },
+      Plotly.newPlot(plotlyChart.value, chartData, layout);
+    };
+
+    // Watch for changes in the `data` prop and re-render the chart
+    watch(
+      () => props.data,
+      () => {
+        renderChart();
+      },
+      { immediate: true }
+    );
+
+    // Render the chart when the component is mounted
+    onMounted(() => {
+      renderChart();
+    });
+
+    return {
+      plotlyChart,
+    };
   },
 });
 </script>

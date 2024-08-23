@@ -18,18 +18,21 @@
       <button
         @click="fetchPerformers('best')"
         class="bg-blue-500 text-white px-4 py-2 rounded"
+        :disabled="loading"
       >
         Best Performers
       </button>
       <button
         @click="fetchPerformers('worst')"
         class="bg-red-500 text-white px-4 py-2 rounded"
+        :disabled="loading"
       >
         Worst Performers
       </button>
       <button
         @click="fetchPerformers('actual')"
         class="bg-green-500 text-white px-4 py-2 rounded"
+        :disabled="loading"
       >
         Closest to Actual
       </button>
@@ -51,6 +54,7 @@
     <!-- Display error state -->
     <div v-if="error" class="text-center text-red-500">
       {{ error }}
+      <button @click="retryFetch" class="text-blue-500 underline">Retry</button>
     </div>
 
     <!-- Filtered Players -->
@@ -73,9 +77,6 @@
         <p class="text-gray-700 mb-1">
           <strong>Position:</strong> {{ player.position }}
         </p>
-        <p class="text-gray-700">
-          <strong>Rank Difference:</strong> {{ player.rank_difference }}
-        </p>
       </div>
     </div>
 
@@ -88,7 +89,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, computed } from "vue";
-import { usePlayerStore } from "@/store/usePlayerStore"; // Import your Pinia store
+import { usePlayerStore } from "@/store/usePlayerStore";
 
 export default defineComponent({
   name: "HomePage",
@@ -97,8 +98,17 @@ export default defineComponent({
     const searchQuery = ref("");
 
     // Function to fetch players based on the type (best, worst, actual)
-    const fetchPerformers = (type: string) => {
-      playerStore.fetchData(type);
+    const fetchPerformers = async (type: string) => {
+      try {
+        await playerStore.fetchData(type);
+      } catch (err) {
+        console.error("Error fetching performers:", err);
+      }
+    };
+
+    // Retry function in case of an error
+    const retryFetch = () => {
+      fetchPerformers("best"); // Retry fetching best performers by default
     };
 
     // Trigger fetching of data when the component is mounted
@@ -122,6 +132,7 @@ export default defineComponent({
       loading: computed(() => playerStore.loading), // Bind loading state
       error: computed(() => playerStore.error), // Bind error state
       fetchPerformers, // Bind function for fetching performers
+      retryFetch, // Retry function for error handling
     };
   },
 });
