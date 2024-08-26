@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import json
 
@@ -20,6 +20,13 @@ with open('2023_yahoo_EOS_results.json') as f:
 with open('2023_yahoo_draft_rankings.json') as f:
     rankings_data = json.load(f)
 
+# Load the 2024 Harris draft rankings
+with open('2024_harris_draft_rankings.json') as f:
+    harris_rankings = json.load(f)
+
+# Track drafted players
+drafted_players = []
+
 # Assign EOS ranks based on fan_points (most points = highest rank)
 def assign_eos_ranks(eos_data):
     # Sort EOS data by fan points in descending order
@@ -31,15 +38,15 @@ def assign_eos_ranks(eos_data):
 
     return sorted_eos
 
-# Combine the two datasets for easier access
+# Combine the two datasets for easier access and filter out drafted players
 def merge_data():
     merged = []
     eos_data_with_ranks = assign_eos_ranks(eos_data)  # Assign ranks to EOS data
 
-    for player in rankings_data:
-        # Only include players with a valid preseason rank
-        if player.get("rank") is None:
-            continue  # Skip players without a preseason rank
+    for player in harris_rankings:  # Use Harris rankings instead of the previous rankings
+        # Skip players that are drafted
+        if player["name"] in drafted_players:
+            continue
 
         # Find matching EOS data by player name
         eos_player = next((p for p in eos_data_with_ranks if p["name"] == player["name"]), None)
@@ -77,7 +84,9 @@ def read_root():
             "/rankings/position/{position}": "Filter rankings by position",
             "/performers": "Get top, under, or met performers",
             "/performers/team/{team}": "Get performers filtered by team",
-            "/performers/position/{position}": "Get performers filtered by position"
+            "/performers/position/{position}": "Get performers filtered by position",
+            "/draft/{player_name}": "Mark a player as drafted and hide them from the list",
+            "/reset_draft": "Reset the drafted players list",
         }
     }
 
@@ -153,3 +162,29 @@ def get_rankings_by_position(
     sorted_data = sorted(filtered_data, key=lambda x: x["fan_points"], reverse=True)
 
     return limit_results(sorted_data, full, limit)
+
+# Endpoint to mark a player as drafted
+@app.post("/draft/{player_name}")
+def draft_player(player_name: str):
+    undrafted_players = merge_data()
+
+    # Check if the player exists in the undrafted players list
+    player = next((p for p in undrafted_players if p["name"].lower() == player_name.lower()), None)
+
+    if player is None:
+        raise HTTPException(status_code=404, detail="Player not found or already drafted")
+
+    # Add the player to the drafted list
+    drafted_players.append(player_name)
+
+    return {
+        "message": f"{player_name} has been drafted.",
+        "remaining_players": merge_data()
+    }
+
+# Reset drafted players list
+@app.post("/reset_draft")
+def reset_draft():
+    global drafted_players
+    drafted_players = []
+    return {"message": "Draft has been reset."}

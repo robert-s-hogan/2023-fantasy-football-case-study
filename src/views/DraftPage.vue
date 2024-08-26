@@ -1,48 +1,18 @@
 <template>
-  <div class="home-page container mx-auto py-10">
+  <div class="draft-page container mx-auto py-10">
     <!-- Main Heading -->
     <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">
-      Welcome to the Fantasy Football Analysis
+      Draft Players (2024 Harris Draft Rankings)
     </h1>
-
-    <!-- Add Link to Draft Page -->
-    <router-link
-      to="/draft"
-      class="block text-center text-blue-500 hover:text-blue-700 font-semibold text-xl mb-10 transition duration-200"
-    >
-      Go to Draft Players
-    </router-link>
-
-    <!-- Link to Case Study -->
-    <router-link
-      to="/case-study"
-      class="block text-center text-blue-500 hover:text-blue-700 font-semibold text-xl mb-10 transition duration-200"
-    >
-      View 2023 Case Study
-    </router-link>
 
     <!-- Filter Buttons -->
     <div class="filters flex justify-center space-x-4 mb-8">
       <button
-        @click="fetchPerformers('best')"
+        @click="fetchPlayers"
         class="bg-blue-500 text-white px-4 py-2 rounded"
         :disabled="loading"
       >
-        Best Performers
-      </button>
-      <button
-        @click="fetchPerformers('worst')"
-        class="bg-red-500 text-white px-4 py-2 rounded"
-        :disabled="loading"
-      >
-        Worst Performers
-      </button>
-      <button
-        @click="fetchPerformers('actual')"
-        class="bg-green-500 text-white px-4 py-2 rounded"
-        :disabled="loading"
-      >
-        Closest to Actual
+        Refresh Player List
       </button>
     </div>
 
@@ -85,6 +55,19 @@
         <p class="text-gray-700 mb-1">
           <strong>Position:</strong> {{ player.position }}
         </p>
+
+        <!-- Only display rank if it's a MinimalPlayer -->
+        <p v-if="isMinimalPlayer(player)" class="text-gray-700 mb-1">
+          <strong>Rank:</strong> {{ player.rank }}
+        </p>
+
+        <button
+          @click="draftPlayer(player.name)"
+          class="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 transition duration-200"
+          :disabled="loading"
+        >
+          Draft Player
+        </button>
       </div>
     </div>
 
@@ -97,37 +80,53 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, computed } from "vue";
-import { usePlayerStore } from "@/store/usePlayerStore";
+import { usePlayerStore } from "@/store/usePlayerStore"; // Using the updated player store
+import { Player, MinimalPlayer } from "@/types/Player"; // Import types
 
 export default defineComponent({
-  name: "HomePage",
+  name: "DraftPage",
   setup() {
-    const playerStore = usePlayerStore(); // Use the Pinia store
+    const playerStore = usePlayerStore(); // Use the updated Pinia store
     const searchQuery = ref("");
 
-    // Function to fetch players based on the type (best, worst, actual)
-    const fetchPerformers = async (type: string) => {
+    // Type guard to check if player is MinimalPlayer
+    const isMinimalPlayer = (player: Player): player is MinimalPlayer => {
+      return (player as MinimalPlayer).rank !== undefined;
+    };
+
+    // Fetch undrafted players from the backend
+    const fetchPlayers = async () => {
       try {
-        await playerStore.fetchData(type);
+        await playerStore.fetchUndraftedPlayers();
       } catch (err) {
-        console.error("Error fetching performers:", err);
+        console.error("Error fetching players:", err);
       }
     };
 
     // Retry function in case of an error
     const retryFetch = () => {
-      fetchPerformers("best"); // Retry fetching best performers by default
+      fetchPlayers(); // Retry fetching players
     };
 
     // Trigger fetching of data when the component is mounted
     onMounted(() => {
-      fetchPerformers("best"); // Default to fetching best performers
+      fetchPlayers(); // Fetch players when component is mounted
     });
+
+    // Function to draft a player
+    const draftPlayer = async (playerName: string) => {
+      try {
+        await playerStore.draftPlayer(playerName);
+        await fetchPlayers(); // Refresh the player list after drafting
+      } catch (err) {
+        console.error("Error drafting player:", err);
+      }
+    };
 
     // Computed property to filter players based on search query
     const filteredPlayers = computed(() => {
-      if (!searchQuery.value) return playerStore.mergedData;
-      return playerStore.mergedData.filter((player) =>
+      if (!searchQuery.value) return playerStore.undraftedPlayers;
+      return playerStore.undraftedPlayers.filter((player) =>
         [player.name, player.team, player.position].some((field) =>
           field?.toLowerCase().includes(searchQuery.value.toLowerCase())
         )
@@ -139,9 +138,29 @@ export default defineComponent({
       filteredPlayers,
       loading: computed(() => playerStore.loading), // Bind loading state
       error: computed(() => playerStore.error), // Bind error state
-      fetchPerformers, // Bind function for fetching performers
+      fetchPlayers, // Fetch player function
+      draftPlayer, // Function to draft a player
       retryFetch, // Retry function for error handling
+      isMinimalPlayer, // Type guard for MinimalPlayer
     };
   },
 });
 </script>
+
+<style scoped>
+.draft-page {
+  padding: 1.5rem;
+}
+
+.player-card {
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.player-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+</style>
