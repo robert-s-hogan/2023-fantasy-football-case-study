@@ -20,7 +20,7 @@
     >
       View 2023 Case Study
     </router-link>
-
+ 
     <!-- Filter Buttons -->
     <div class="filters flex justify-center space-x-4 mb-8">
       <button
