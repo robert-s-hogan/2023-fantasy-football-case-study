@@ -129,8 +129,9 @@ export default defineComponent({
   setup() {
     const playerStore = usePlayerStore();
 
+    // Fetch 2023 case study data when the component is mounted
     onMounted(() => {
-      playerStore.fetchData();
+      playerStore.fetch2023CaseStudy();
     });
 
     // Computed properties for filtered data

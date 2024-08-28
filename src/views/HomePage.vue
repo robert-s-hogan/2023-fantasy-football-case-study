@@ -1,11 +1,10 @@
 <template>
   <div class="home-page container mx-auto py-10">
-    <!-- Main Heading -->
     <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">
       Welcome to the Fantasy Football Analysis
     </h1>
 
-    <!-- Add Link to Draft Page -->
+    <!-- Link to Draft Page -->
     <router-link
       to="/draft"
       class="block text-center text-blue-500 hover:text-blue-700 font-semibold text-xl mb-10 transition duration-200"
@@ -20,7 +19,7 @@
     >
       View 2023 Case Study
     </router-link>
- 
+
     <!-- Filter Buttons -->
     <div class="filters flex justify-center space-x-4 mb-8">
       <button
@@ -51,7 +50,7 @@
       <input
         type="text"
         v-model="searchQuery"
-        placeholder="Search for players by name, team, or position..."
+        placeholder="Search for players by name, position..."
         class="search-input w-full max-w-md px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
     </div>
@@ -70,7 +69,6 @@
       v-if="filteredPlayers.length > 0 && !loading"
       class="player-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
     >
-      <!-- Player Cards -->
       <div
         v-for="player in filteredPlayers"
         :key="player.name"
@@ -79,9 +77,6 @@
         <h3 class="text-xl font-semibold text-gray-900 mb-2">
           {{ player.name }}
         </h3>
-        <p class="text-gray-700 mb-1">
-          <strong>Team:</strong> {{ player.team }}
-        </p>
         <p class="text-gray-700 mb-1">
           <strong>Position:</strong> {{ player.position }}
         </p>
@@ -108,7 +103,7 @@ export default defineComponent({
     // Function to fetch players based on the type (best, worst, actual)
     const fetchPerformers = async (type: string) => {
       try {
-        await playerStore.fetchData(type);
+        await playerStore.fetchPerformers(type);
       } catch (err) {
         console.error("Error fetching performers:", err);
       }
@@ -128,7 +123,7 @@ export default defineComponent({
     const filteredPlayers = computed(() => {
       if (!searchQuery.value) return playerStore.mergedData;
       return playerStore.mergedData.filter((player) =>
-        [player.name, player.team, player.position].some((field) =>
+        [player.name, player.position].some((field) =>
           field?.toLowerCase().includes(searchQuery.value.toLowerCase())
         )
       );
@@ -137,10 +132,10 @@ export default defineComponent({
     return {
       searchQuery,
       filteredPlayers,
-      loading: computed(() => playerStore.loading), // Bind loading state
-      error: computed(() => playerStore.error), // Bind error state
-      fetchPerformers, // Bind function for fetching performers
-      retryFetch, // Retry function for error handling
+      loading: computed(() => playerStore.loading),
+      error: computed(() => playerStore.error),
+      fetchPerformers,
+      retryFetch,
     };
   },
 });

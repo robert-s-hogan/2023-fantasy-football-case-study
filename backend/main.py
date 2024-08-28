@@ -38,13 +38,13 @@ def assign_eos_ranks(eos_data):
 
     return sorted_eos
 
-# Combine the two datasets for easier access and filter out drafted players
-def merge_data():
+# Combine 2023 preseason and EOS data for a case study
+def get_2023_case_study():
     merged = []
     eos_data_with_ranks = assign_eos_ranks(eos_data)  # Assign ranks to EOS data
 
-    for player in harris_rankings:  # Use Harris rankings instead of the previous rankings
-        # Skip players that are drafted
+    for player in harris_rankings:
+        # Skip players that are drafted or whose data is incomplete
         if player["name"] in drafted_players:
             continue
 
@@ -52,7 +52,6 @@ def merge_data():
         eos_player = next((p for p in eos_data_with_ranks if p["name"] == player["name"]), None)
 
         if eos_player:
-            # Calculate rank difference (preseason rank - EOS rank)
             rank_difference = int(player.get("rank", 0) - eos_player.get("eos_rank", 0))
 
             merged.append({
@@ -62,15 +61,41 @@ def merge_data():
                 "rank_difference": rank_difference,
                 "games_played": eos_player.get("games_played"),
                 "fan_points": eos_player.get("fan_points"),
-                "passing": eos_player.get("passing", None),  # Safe access to passing stats
-                "rushing": eos_player.get("rushing", None),  # Safe access to rushing stats
-                "receiving": eos_player.get("receiving", None),  # Safe access to receiving stats
-                "fumbles": eos_player.get("fumbles", None),  # Safe access to fumbles stats
                 "position": player.get("position"),
-                "team": player.get("team"),
+                "team": player.get("team", "Unknown"),  # Ensure 'team' field is included
+                # Additional stats, if any
+                "passing": eos_player.get("passing", None),
+                "rushing": eos_player.get("rushing", None),
+                "receiving": eos_player.get("receiving", None),
+                "fumbles": eos_player.get("fumbles", None),
             })
 
     return merged
+
+# Endpoint for 2023 case study performers (preseason vs. end-of-season data)
+@app.get("/performers/2023")
+def get_2023_performers():
+    return get_2023_case_study()  # Return the 2023 case study data
+
+
+# Process only the 2024 mock draft data (Harris rankings)
+def get_2024_mock_drafts():
+    # This function only needs to return Harris rankings, no need to compare with EOS data
+    mock_draft_data = []
+
+    for player in harris_rankings:
+        # Exclude drafted players from the mock draft list
+        if player["name"] in drafted_players:
+            continue
+
+        mock_draft_data.append({
+            "name": player["name"],
+            "rank": player.get("rank", "N/A"),
+            "position": player.get("position"),
+            "team": player.get("team", "Unknown"),  # Team should be in Harris rankings
+        })
+
+    return mock_draft_data
 
 # Root endpoint
 @app.get("/")
@@ -96,6 +121,12 @@ def limit_results(data, full: bool, limit: int = 25):
         return data
     return data[:limit]
 
+# Endpoint to get the 2024 Harris Draft Rankings (undrafted players)
+@app.get("/players")
+def get_undrafted_players():
+    return get_2024_mock_drafts()
+
+
 # Endpoint to get performers based on rank difference type (best, worst, actual)
 @app.get("/performers")
 def get_performers(
@@ -105,7 +136,7 @@ def get_performers(
     full: bool = False,  # Return full list if full=true
     limit: int = 25
 ):
-    merged_data = merge_data()
+    merged_data = get_2023_case_study()  # Use case study function
 
     # Apply team filter if provided
     if team:
@@ -129,14 +160,14 @@ def get_performers(
     # Limit the results
     return sorted_data if full else sorted_data[:limit]
 
-# Filter rankings by team
+# Filter rankings by team (2023 Case Study)
 @app.get("/rankings/team/{team}")
 def get_rankings_by_team(
     team: str,
     full: bool = False,
     limit: int = 25
 ):
-    merged_data = merge_data()
+    merged_data = get_2023_case_study()  # Use case study function
 
     # Filter by team
     filtered_data = [p for p in merged_data if p["team"].upper() == team.upper()]
@@ -146,14 +177,14 @@ def get_rankings_by_team(
 
     return limit_results(sorted_data, full, limit)
 
-# Filter rankings by position
+# Filter rankings by position (2023 Case Study)
 @app.get("/rankings/position/{position}")
 def get_rankings_by_position(
     position: str,
     full: bool = False,
     limit: int = 25
 ):
-    merged_data = merge_data()
+    merged_data = get_2023_case_study()  # Use case study function
 
     # Filter by position
     filtered_data = [p for p in merged_data if p["position"].upper() == position.upper()]
@@ -163,10 +194,10 @@ def get_rankings_by_position(
 
     return limit_results(sorted_data, full, limit)
 
-# Endpoint to mark a player as drafted
+# Endpoint to mark a player as drafted (for 2024 Mock Drafts)
 @app.post("/draft/{player_name}")
 def draft_player(player_name: str):
-    undrafted_players = merge_data()
+    undrafted_players = get_2024_mock_drafts()
 
     # Check if the player exists in the undrafted players list
     player = next((p for p in undrafted_players if p["name"].lower() == player_name.lower()), None)
@@ -179,7 +210,7 @@ def draft_player(player_name: str):
 
     return {
         "message": f"{player_name} has been drafted.",
-        "remaining_players": merge_data()
+        "remaining_players": get_2024_mock_drafts()
     }
 
 # Reset drafted players list

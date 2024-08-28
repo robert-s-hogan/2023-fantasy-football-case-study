@@ -2,116 +2,93 @@
   <div class="draft-page container mx-auto py-10">
     <!-- Main Heading -->
     <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">
-      Draft Players (2024 Harris Draft Rankings)
+      Draft Players (2024 Harris Mock Drafts)
     </h1>
-
-    <!-- Filter Buttons -->
-    <div class="filters flex justify-center space-x-4 mb-8">
-      <button
-        @click="fetchPlayers"
-        class="bg-blue-500 text-white px-4 py-2 rounded"
-        :disabled="loading"
-      >
-        Refresh Player List
-      </button>
-    </div>
 
     <!-- Search Bar -->
     <div class="search-section mb-8 flex justify-center">
       <input
         type="text"
         v-model="searchQuery"
-        placeholder="Search for players by name, team, or position..."
-        class="search-input w-full max-w-md px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        placeholder="Search for players by name or position..."
+        class="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
     </div>
 
-    <!-- Display loading state -->
-    <div v-if="loading" class="text-center">Loading players...</div>
-
-    <!-- Display error state -->
-    <div v-if="error" class="text-center text-red-500">
-      {{ error }}
-      <button @click="retryFetch" class="text-blue-500 underline">Retry</button>
-    </div>
-
-    <!-- Filtered Players -->
-    <div
-      v-if="filteredPlayers.length > 0 && !loading"
-      class="player-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
-    >
-      <!-- Player Cards -->
-      <div
-        v-for="player in filteredPlayers"
-        :key="player.name"
-        class="player-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300"
-      >
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">
-          {{ player.name }}
-        </h3>
-        <p class="text-gray-700 mb-1">
-          <strong>Team:</strong> {{ player.team }}
-        </p>
-        <p class="text-gray-700 mb-1">
-          <strong>Position:</strong> {{ player.position }}
-        </p>
-
-        <!-- Only display rank if it's a MinimalPlayer -->
-        <p v-if="isMinimalPlayer(player)" class="text-gray-700 mb-1">
-          <strong>Rank:</strong> {{ player.rank }}
-        </p>
-
-        <button
-          @click="draftPlayer(player.name)"
-          class="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 transition duration-200"
-          :disabled="loading"
-        >
-          Draft Player
-        </button>
+    <!-- Conditional content: If loading, show "loading", if filtered players, show the table, else show "no results" -->
+    <div>
+      <!-- Show loading state -->
+      <div v-if="loading" class="text-center text-gray-600">
+        Loading players...
       </div>
-    </div>
 
-    <!-- No Results -->
-    <div v-else-if="!loading" class="no-results text-center text-gray-600 mt-8">
-      No players found matching your search.
+      <!-- Show players table when players are loaded -->
+      <div v-else-if="filteredPlayers.length > 0" class="overflow-x-auto">
+        <table class="table-auto w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="px-4 py-2 text-gray-600 text-center">Rank</th>
+              <th class="px-4 py-2 text-gray-600 text-center">Name</th>
+              <th class="px-4 py-2 text-gray-600 text-center">Position</th>
+              <th class="px-4 py-2 text-gray-600 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="player in filteredPlayers"
+              :key="player.name"
+              :class="getRowClass(player.position)"
+              class="hover:bg-gray-50"
+            >
+              <!-- Check if the player has rank (MinimalPlayer) -->
+              <td class="border px-4 py-2 text-center">
+                {{ isMinimalPlayer(player) ? player.rank : "N/A" }}
+              </td>
+              <td class="border px-4 py-2 text-center">{{ player.name }}</td>
+              <td class="border px-4 py-2 text-center">
+                {{ player.position }}
+              </td>
+              <td class="border px-4 py-2 text-center">
+                <button
+                  @click="draftPlayer(player.name)"
+                  class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 transition duration-200"
+                  :disabled="loading"
+                >
+                  Draft Player
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- No Results -->
+      <div v-else class="no-results text-center text-gray-600 mt-8">
+        No players found matching your search.
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, computed } from "vue";
-import { usePlayerStore } from "@/store/usePlayerStore"; // Using the updated player store
-import { Player, MinimalPlayer } from "@/types/Player"; // Import types
+import { usePlayerStore } from "@/store/usePlayerStore";
+import { Player, MinimalPlayer } from "@/types/Player"; // Ensure you import Player types
 
 export default defineComponent({
   name: "DraftPage",
   setup() {
-    const playerStore = usePlayerStore(); // Use the updated Pinia store
-    const searchQuery = ref("");
+    const playerStore = usePlayerStore(); // Access the Pinia store
+    const searchQuery = ref(""); // Search query input
 
-    // Type guard to check if player is MinimalPlayer
-    const isMinimalPlayer = (player: Player): player is MinimalPlayer => {
-      return (player as MinimalPlayer).rank !== undefined;
-    };
-
-    // Fetch undrafted players from the backend
+    // Fetch 2024 mock draft data
     const fetchPlayers = async () => {
       try {
-        await playerStore.fetchUndraftedPlayers();
+        await playerStore.fetchUndraftedPlayers(); // Fetch undrafted players
       } catch (err) {
         console.error("Error fetching players:", err);
       }
     };
-
-    // Retry function in case of an error
-    const retryFetch = () => {
-      fetchPlayers(); // Retry fetching players
-    };
-
-    // Trigger fetching of data when the component is mounted
-    onMounted(() => {
-      fetchPlayers(); // Fetch players when component is mounted
-    });
 
     // Function to draft a player
     const draftPlayer = async (playerName: string) => {
@@ -123,44 +100,43 @@ export default defineComponent({
       }
     };
 
+    // Type guard to check if a player is a MinimalPlayer
+    const isMinimalPlayer = (player: Player): player is MinimalPlayer => {
+      return (player as MinimalPlayer).rank !== undefined;
+    };
+
     // Computed property to filter players based on search query
     const filteredPlayers = computed(() => {
       if (!searchQuery.value) return playerStore.undraftedPlayers;
+
       return playerStore.undraftedPlayers.filter((player) =>
-        [player.name, player.team, player.position].some((field) =>
+        [player.name, player.position].some((field) =>
           field?.toLowerCase().includes(searchQuery.value.toLowerCase())
         )
       );
     });
 
+    // Get row class based on player position (color rows by position)
+    const getRowClass = (position: string) => {
+      if (position === "RB") return "bg-blue-100"; // Blue for RB
+      if (position === "WR") return "bg-green-100"; // Green for WR
+      if (position === "QB") return "bg-yellow-100"; // Yellow for QB
+      if (position === "TE") return "bg-purple-100"; // Purple for TE
+      return ""; // Default for other positions
+    };
+
+    onMounted(() => {
+      fetchPlayers(); // Fetch players when component is mounted
+    });
+
     return {
       searchQuery,
       filteredPlayers,
-      loading: computed(() => playerStore.loading), // Bind loading state
-      error: computed(() => playerStore.error), // Bind error state
-      fetchPlayers, // Fetch player function
-      draftPlayer, // Function to draft a player
-      retryFetch, // Retry function for error handling
-      isMinimalPlayer, // Type guard for MinimalPlayer
+      draftPlayer,
+      getRowClass,
+      loading: computed(() => playerStore.loading), // Access the loading state from the store
+      isMinimalPlayer, // Use the type guard to check for MinimalPlayer
     };
   },
 });
 </script>
-
-<style scoped>
-.draft-page {
-  padding: 1.5rem;
-}
-
-.player-card {
-  background-color: #f9f9f9;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s ease;
-}
-
-.player-card:hover {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-</style>

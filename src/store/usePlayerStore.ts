@@ -1,52 +1,29 @@
 import { defineStore } from "pinia";
 import axios from "axios";
-import { Player } from "@/types/Player"; // Using Player union type (MinimalPlayer | DetailedPlayer)
+import { Player } from "@/types/Player"; // Assuming this type is correctly defined in your project
 
+// Define the State interface for Pinia store
 interface State {
-  mergedData: Player[]; // Store for merged data from backend
-  undraftedPlayers: Player[]; // Store for undrafted players (from Harris draft rankings)
-  loading: boolean;
-  error: string | null;
+  mergedData: Player[]; // Holds data for 2023 case study and performers
+  undraftedPlayers: Player[]; // Holds 2024 Harris Draft players (undrafted players)
+  loading: boolean; // Loading state for API requests
+  error: string | null; // Holds error messages, if any
 }
 
+// Define the Pinia store for managing player data
 export const usePlayerStore = defineStore("player", {
+  // State for the store
   state: (): State => ({
-    mergedData: [], // Store for merged data (best, worst, actual performers)
-    undraftedPlayers: [], // Store for undrafted players (Harris draft)
-    loading: false,
-    error: null,
+    mergedData: [], // Case study or performer data
+    undraftedPlayers: [], // Undrafted players for 2024 draft
+    loading: false, // Loading state
+    error: null, // Error message state
   }),
 
+  // Actions (Async functions) for data fetching and manipulation
   actions: {
-    // Fetching data from FastAPI `/performers` endpoint
-    async fetchData(type = "best", full = true) {
-      this.loading = true;
-      this.error = null;
-
-      try {
-        const response = await axios.get<Player[]>(
-          "http://127.0.0.1:8001/performers",
-          {
-            params: {
-              type, // best, worst, actual
-              full, // full list or limited to 25
-            },
-          }
-        );
-
-        console.log("API Response Data:", response.data); // Log the API response data
-
-        this.mergedData = response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || "Failed to fetch data.";
-        console.error("Error fetching data:", error.message);
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    // Fetch undrafted players from FastAPI `/players` endpoint (2024 Harris Draft Rankings)
-    async fetchUndraftedPlayers() {
+    // Fetch undrafted players for 2024 Harris Mock Draft
+    async fetchUndraftedPlayers(): Promise<void> {
       this.loading = true;
       this.error = null;
 
@@ -54,10 +31,7 @@ export const usePlayerStore = defineStore("player", {
         const response = await axios.get<Player[]>(
           "http://127.0.0.1:8001/players"
         );
-
-        console.log("Undrafted Players Data:", response.data); // Log the API response data
-
-        this.undraftedPlayers = response.data; // Store undrafted players
+        this.undraftedPlayers = response.data; // Store response in state
       } catch (error: any) {
         this.error =
           error.response?.data?.message || "Failed to fetch undrafted players.";
@@ -67,15 +41,58 @@ export const usePlayerStore = defineStore("player", {
       }
     },
 
-    // Draft a player by name, mark as drafted and update the list
-    async draftPlayer(playerName: string) {
+    // Fetch the 2023 case study data (Preseason vs EOS rankings)
+    async fetch2023CaseStudy(): Promise<void> {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await axios.get<Player[]>(
+          "http://127.0.0.1:8001/performers/2023"
+        );
+        this.mergedData = response.data; // Store case study data in state
+      } catch (error: any) {
+        this.error =
+          error.response?.data?.message ||
+          "Failed to fetch 2023 case study data.";
+        console.error("Error fetching 2023 case study data:", error.message);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Fetch performers by type (best, worst, actual)
+    async fetchPerformers(type: string): Promise<void> {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await axios.get<Player[]>(
+          "http://127.0.0.1:8001/performers",
+          {
+            params: { type },
+          }
+        );
+        this.mergedData = response.data; // Store performers data in state
+      } catch (error: any) {
+        this.error =
+          error.response?.data?.message ||
+          `Failed to fetch performers (${type}).`;
+        console.error(`Error fetching performers (${type}):`, error.message);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Draft a player from the 2024 Harris Draft Rankings
+    async draftPlayer(playerName: string): Promise<void> {
       this.loading = true;
       this.error = null;
 
       try {
         await axios.post(`http://127.0.0.1:8001/draft/${playerName}`);
 
-        // After drafting the player, remove them from the undrafted players list
+        // Remove the drafted player from the undrafted players list
         this.undraftedPlayers = this.undraftedPlayers.filter(
           (player) => player.name !== playerName
         );
@@ -84,6 +101,22 @@ export const usePlayerStore = defineStore("player", {
           error.response?.data?.message ||
           `Failed to draft player ${playerName}.`;
         console.error("Error drafting player:", error.message);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Reset the drafted players list (for 2024 mock drafts)
+    async resetDraft(): Promise<void> {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        await axios.post("http://127.0.0.1:8001/reset_draft");
+        this.undraftedPlayers = []; // Clear the undrafted players list
+      } catch (error: any) {
+        this.error = error.response?.data?.message || "Failed to reset draft.";
+        console.error("Error resetting draft:", error.message);
       } finally {
         this.loading = false;
       }
