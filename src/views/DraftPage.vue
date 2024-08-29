@@ -5,14 +5,26 @@
       Draft Players (2024 Harris Mock Drafts)
     </h1>
 
-    <!-- Search Bar -->
-    <div class="search-section mb-8 flex justify-center">
-      <input
-        type="text"
-        v-model="searchQuery"
-        placeholder="Search for players by name or position..."
-        class="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      />
+    <!-- Reset Draft Button and Search Bar -->
+    <div class="controls flex justify-between items-center mb-8">
+      <!-- Reset Draft Button -->
+      <button
+        @click="resetDraft"
+        class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+        :disabled="loading"
+      >
+        Reset Draft
+      </button>
+
+      <!-- Search Bar -->
+      <div class="search-section">
+        <input
+          type="text"
+          v-model="searchQuery"
+          placeholder="Search for players by name or position..."
+          class="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
     </div>
 
     <!-- Conditional content: If loading, show "loading", if filtered players, show the table, else show "no results" -->
@@ -90,6 +102,16 @@ export default defineComponent({
       }
     };
 
+    // Function to reset the draft
+    const resetDraft = async () => {
+      try {
+        await playerStore.resetDraft(); // Reset the drafted players
+        await fetchPlayers(); // Re-fetch players after reset
+      } catch (err) {
+        console.error("Error resetting draft:", err);
+      }
+    };
+
     // Function to draft a player
     const draftPlayer = async (playerName: string) => {
       try {
@@ -133,6 +155,7 @@ export default defineComponent({
       searchQuery,
       filteredPlayers,
       draftPlayer,
+      resetDraft, // Add the reset draft function
       getRowClass,
       loading: computed(() => playerStore.loading), // Access the loading state from the store
       isMinimalPlayer, // Use the type guard to check for MinimalPlayer
