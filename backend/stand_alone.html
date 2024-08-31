@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive To-Do List</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        padding: 10px;
+        margin: 5px 0;
+        background-color: #f4f4f4;
+        border: 1px solid #ddd;
+        cursor: pointer;
+      }
+      li.completed {
+        text-decoration: line-through;
+        background-color: black;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Interactive To-Do List</h1>
+    <ul id="todo-list"></ul>
+
+    <script>
+      const players = [
+        { rank: 1, name: "Josh Allen", posRank: "QB1" },
+
+        { rank: 2, name: "Lamar Jackson", posRank: "QB2" },
+        { rank: 3, name: "Patrick Mahomes", posRank: "QB3" },
+        { rank: 4, name: "Christian McCaffrey", posRank: "RB1" },
+        { rank: 5, name: "Bijan Robinson", posRank: "RB2" },
+        { rank: 6, name: "Breece Hall", posRank: "RB3" },
+        { rank: 7, name: "Tyreek Hill", posRank: "WR1" },
+        { rank: 8, name: "CeeDee Lamb", posRank: "WR2" },
+        { rank: 9, name: "Ja'Marr Chase", posRank: "WR3" },
+        { rank: 10, name: "Justin Jefferson", posRank: "WR4" },
+        { rank: 11, name: "Joe Burrow", posRank: "QB4" },
+        { rank: 12, name: "C.J. Stroud", posRank: "QB5" },
+        { rank: 13, name: "Jalen Hurts", posRank: "QB6" },
+        { rank: 14, name: "Saquon Barkley", posRank: "RB4" },
+        { rank: 15, name: "A.J. Brown", posRank: "WR5" },
+        { rank: 16, name: "Amon-Ra St. Brown", posRank: "WR6" },
+        { rank: 17, name: "Jonathan Taylor", posRank: "RB5" },
+        { rank: 18, name: "Dak Prescott", posRank: "QB7" },
+        { rank: 19, name: "Jordan Love", posRank: "QB8" },
+        { rank: 20, name: "Puka Nacua", posRank: "WR7" },
+        { rank: 21, name: "Davante Adams", posRank: "WR8" },
+        { rank: 22, name: "Brock Purdy", posRank: "QB9" },
+        { rank: 23, name: "Tua Tagovailoa", posRank: "QB10" },
+        { rank: 24, name: "Anthony Richardson", posRank: "QB11" },
+        { rank: 25, name: "Josh Jacobs", posRank: "RB6" },
+        { rank: 26, name: "Travis Etienne", posRank: "RB7" },
+        { rank: 27, name: "Jahmyr Gibbs", posRank: "RB8" },
+        { rank: 28, name: "Joe Mixon", posRank: "RB9" },
+        { rank: 29, name: "Kyler Murray", posRank: "QB12" },
+        { rank: 30, name: "Stefon Diggs", posRank: "WR9" },
+        { rank: 31, name: "Brandon Aiyuk", posRank: "WR10" },
+        { rank: 32, name: "D.J. Moore", posRank: "WR11" },
+        { rank: 33, name: "Nico Collins", posRank: "WR12" },
+        { rank: 34, name: "Kyren Williams", posRank: "RB10" },
+        { rank: 35, name: "Alvin Kamara", posRank: "RB11" },
+        { rank: 36, name: "Derrick Henry", posRank: "RB12" },
+        { rank: 37, name: "Rachaad White", posRank: "RB13" },
+        { rank: 38, name: "Michael Pittman", posRank: "WR13" },
+        { rank: 39, name: "Deebo Samuel", posRank: "WR14" },
+        { rank: 40, name: "Garrett Wilson", posRank: "WR15" },
+        { rank: 41, name: "Chris Olave", posRank: "WR16" },
+        { rank: 42, name: "Mike Evans", posRank: "WR17" },
+        { rank: 43, name: "Justin Herbert", posRank: "QB13" },
+        { rank: 44, name: "Trevor Lawrence", posRank: "QB14" },
+        { rank: 45, name: "Keenan Allen", posRank: "WR18" },
+        { rank: 46, name: "Cooper Kupp", posRank: "WR19" },
+        { rank: 47, name: "Jared Goff", posRank: "QB15" },
+        { rank: 48, name: "Kirk Cousins", posRank: "QB16" },
+        { rank: 49, name: "Caleb Williams", posRank: "QB17" },
+        { rank: 50, name: "Isiah Pacheco", posRank: "RB14" },
+        { rank: 51, name: "De'Von Achane", posRank: "RB15" },
+        { rank: 52, name: "James Cook", posRank: "RB16" },
+        { rank: 53, name: "Aaron Jones", posRank: "RB17" },
+        { rank: 54, name: "Drake London", posRank: "WR20" },
+        { rank: 55, name: "DK Metcalf", posRank: "WR21" },
+        { rank: 56, name: "DeVonta Smith", posRank: "WR22" },
+        { rank: 57, name: "Travis Kelce", posRank: "TE1" },
+        { rank: 58, name: "Mark Andrews", posRank: "TE2" },
+        { rank: 59, name: "Sam LaPorta", posRank: "TE3" },
+        { rank: 60, name: "Matthew Stafford", posRank: "QB18" },
+        { rank: 61, name: "Ken Walker", posRank: "RB18" },
+        { rank: 62, name: "Christian Kirk", posRank: "WR23" },
+        { rank: 63, name: "Jaylen Waddle", posRank: "WR24" },
+        { rank: 64, name: "Marvin Harrison", posRank: "WR25" },
+        { rank: 65, name: "Zay Flowers", posRank: "WR26" },
+        { rank: 66, name: "Terry McLaurin", posRank: "WR27" },
+        { rank: 67, name: "Aaron Rodgers", posRank: "QB19" },
+        { rank: 68, name: "Jayden Daniels", posRank: "QB20" },
+        { rank: 69, name: "George Kittle", posRank: "TE4" },
+        { rank: 70, name: "Trey McBride", posRank: "TE5" },
+        { rank: 71, name: "James Conner", posRank: "RB19" },
+        { rank: 72, name: "Tee Higgins", posRank: "WR28" },
+        { rank: 73, name: "Chris Godwin", posRank: "WR29" },
+        { rank: 74, name: "Calvin Ridley", posRank: "WR30" },
+        { rank: 75, name: "Amari Cooper", posRank: "WR31" },
+        { rank: 76, name: "Raheem Mostert", posRank: "RB20" },
+        { rank: 77, name: "Tank Dell", posRank: "WR32" },
+        { rank: 78, name: "Rashee Rice", posRank: "WR33" },
+        { rank: 79, name: "George Pickens", posRank: "WR34" },
+        { rank: 80, name: "Diontae Johnson", posRank: "WR35" },
+        { rank: 81, name: "Baker Mayfield", posRank: "QB21" },
+        { rank: 82, name: "Dalton Kincaid", posRank: "TE6" },
+        { rank: 83, name: "Tyjae Spears", posRank: "RB21" },
+        { rank: 84, name: "Austin Ekeler", posRank: "RB22" },
+        { rank: 85, name: "D'Andre Swift", posRank: "RB23" },
+        { rank: 86, name: "Geno Smith", posRank: "QB22" },
+        { rank: 87, name: "Deshaun Watson", posRank: "QB23" },
+        { rank: 88, name: "Rhamondre Stevenson", posRank: "RB24" },
+        { rank: 89, name: "Tony Pollard", posRank: "RB25" },
+        { rank: 90, name: "Javonte Williams", posRank: "RB26" },
+        { rank: 91, name: "David Montgomery", posRank: "RB27" },
+        { rank: 92, name: "Najee Harris", posRank: "RB28" },
+        { rank: 93, name: "Kyle Pitts", posRank: "TE7" },
+        { rank: 94, name: "Jakobi Meyers", posRank: "WR36" },
+        { rank: 95, name: "Courtland Sutton", posRank: "WR37" },
+        { rank: 96, name: "Chase Brown", posRank: "RB29" },
+        { rank: 97, name: "Zach Charbonnet", posRank: "RB30" },
+        { rank: 98, name: "Derek Carr", posRank: "QB24" },
+        { rank: 99, name: "Jayden Reed", posRank: "WR38" },
+        { rank: 100, name: "Jordan Addison", posRank: "WR39" },
+        { rank: 101, name: "Jaxon Smith-Njigba", posRank: "WR40" },
+        { rank: 102, name: "Brian Robinson", posRank: "RB31" },
+        { rank: 103, name: "Malik Nabers", posRank: "WR41" },
+        { rank: 104, name: "Xavier Worthy", posRank: "WR42" },
+        { rank: 105, name: "Marquise Brown", posRank: "WR43" },
+        { rank: 106, name: "Jake Ferguson", posRank: "TE8" },
+        { rank: 107, name: "Evan Engram", posRank: "TE9" },
+        { rank: 108, name: "Jaylen Warren", posRank: "RB32" },
+        { rank: 109, name: "Devin Singletary", posRank: "RB33" },
+        { rank: 110, name: "Chuba Hubbard", posRank: "RB34" },
+        { rank: 111, name: "Zack Moss", posRank: "RB35" },
+        { rank: 112, name: "Zeke Elliott", posRank: "RB36" },
+        { rank: 113, name: "DeAndre Hopkins", posRank: "WR44" },
+        { rank: 114, name: "Sam Darnold", posRank: "QB25" },
+        { rank: 115, name: "Daniel Jones", posRank: "QB26" },
+        { rank: 116, name: "Will Levis", posRank: "QB27" },
+        { rank: 117, name: "Jerry Jeudy", posRank: "WR45" },
+        { rank: 118, name: "Tyler Lockett", posRank: "WR46" },
+        { rank: 119, name: "Christian Watson", posRank: "WR47" },
+        { rank: 120, name: "Rome Odunze", posRank: "WR48" },
+        { rank: 121, name: "Bo Nix", posRank: "QB28" },
+        { rank: 122, name: "Russell Wilson", posRank: "QB29" },
+        { rank: 123, name: "Bryce Young", posRank: "QB30" },
+        { rank: 124, name: "Dallas Goedert", posRank: "TE10" },
+        { rank: 125, name: "Brock Bowers", posRank: "TE11" },
+        { rank: 126, name: "Adam Thielen", posRank: "WR49" },
+        { rank: 127, name: "Romeo Doubs", posRank: "WR50" },
+        { rank: 128, name: "Khalil Shakir", posRank: "WR51" },
+        { rank: 129, name: "Keon Coleman", posRank: "WR52" },
+        { rank: 130, name: "Brandin Cooks", posRank: "WR53" },
+        { rank: 131, name: "Josh Palmer", posRank: "WR54" },
+        { rank: 132, name: "Zamir White", posRank: "RB37" },
+        { rank: 133, name: "Khalil Herbert", posRank: "RB38" },
+        { rank: 134, name: "T.J. Hockenson", posRank: "TE12" },
+        { rank: 135, name: "Nick Chubb", posRank: "RB39" },
+        { rank: 136, name: "Jerome Ford", posRank: "RB40" },
+        { rank: 137, name: "Gus Edwards", posRank: "RB41" },
+        { rank: 138, name: "J.K. Dobbins", posRank: "RB42" },
+        { rank: 139, name: "Brian Thomas", posRank: "WR55" },
+        { rank: 140, name: "Mike Williams", posRank: "WR56" },
+        { rank: 141, name: "Ladd McConkey", posRank: "WR57" },
+        { rank: 142, name: "Tyler Allgeier", posRank: "RB43" },
+        { rank: 143, name: "Antonio Gibson", posRank: "RB44" },
+        { rank: 144, name: "Ty Chandler", posRank: "RB45" },
+        { rank: 145, name: "Trey Benson", posRank: "RB46" },
+        { rank: 146, name: "Blake Corum", posRank: "RB47" },
+        { rank: 147, name: "Jonathon Brooks", posRank: "RB48" },
+        { rank: 148, name: "Jameson Williams", posRank: "WR58" },
+        { rank: 149, name: "Gabe Davis", posRank: "WR59" },
+        { rank: 150, name: "Adonai Mitchell", posRank: "WR60" },
+        { rank: 151, name: "Luke Musgrave", posRank: "TE13" },
+        { rank: 152, name: "Cole Kmet", posRank: "TE14" },
+        { rank: 153, name: "David Njoku", posRank: "TE15" },
+        { rank: 154, name: "Dalton Schultz", posRank: "TE16" },
+        { rank: 155, name: "Curtis Samuel", posRank: "WR61" },
+        { rank: 156, name: "Demario Douglas", posRank: "WR62" },
+        { rank: 157, name: "Dontayvion Wicks", posRank: "WR63" },
+        { rank: 158, name: "Rashid Shaheed", posRank: "WR64" },
+        { rank: 159, name: "Gardner Minshew", posRank: "QB31" },
+        { rank: 160, name: "Rico Dowdle", posRank: "RB49" },
+        { rank: 161, name: "Michael Wilson", posRank: "WR65" },
+        { rank: 162, name: "Ricky Pearsall", posRank: "WR66" },
+        { rank: 163, name: "Jaylen Wright", posRank: "RB50" },
+        { rank: 164, name: "Roschon Johnson", posRank: "RB51" },
+        { rank: 165, name: "Jaleel McLaughlin", posRank: "RB52" },
+        { rank: 166, name: "D'Onta Foreman", posRank: "RB53" },
+        { rank: 167, name: "Wan'Dale Robinson", posRank: "WR67" },
+        { rank: 168, name: "Josh Downs", posRank: "WR68" },
+        { rank: 169, name: "Jamaal Williams", posRank: "RB54" },
+        { rank: 170, name: "Ray Davis", posRank: "RB55" },
+        { rank: 171, name: "Alexander Mattison", posRank: "RB56" },
+        { rank: 172, name: "MarShawn Lloyd", posRank: "RB57" },
+        { rank: 173, name: "Taysom Hill", posRank: "TE17" },
+        { rank: 174, name: "Keaton Mitchell", posRank: "RB58" },
+        { rank: 175, name: "Trey Palmer", posRank: "WR69" },
+        { rank: 176, name: "Quentin Johnston", posRank: "WR70" },
+        { rank: 177, name: "Xavier Legette", posRank: "WR71" },
+        { rank: 178, name: "Jacoby Brissett", posRank: "QB32" },
+        { rank: 179, name: "Justin Fields", posRank: "QB33" },
+        { rank: 180, name: "Drake Maye", posRank: "QB34" },
+        { rank: 181, name: "Will Shipley", posRank: "RB59" },
+        { rank: 182, name: "Dylan Laube", posRank: "RB60" },
+        { rank: 183, name: "Bucky Irving", posRank: "RB61" },
+        { rank: 184, name: "Dameon Pierce", posRank: "RB62" },
+        { rank: 185, name: "Miles Sanders", posRank: "RB63" },
+        { rank: 186, name: "Marvin Mims", posRank: "WR72" },
+        { rank: 187, name: "Darnell Mooney", posRank: "WR73" },
+        { rank: 188, name: "Ja'Lynn Polk", posRank: "WR74" },
+        { rank: 189, name: "Cade Otton", posRank: "TE18" },
+        { rank: 190, name: "Pat Freiermuth", posRank: "TE19" },
+        { rank: 191, name: "Hunter Henry", posRank: "TE20" },
+        { rank: 192, name: "Tank Bigsby", posRank: "RB64" },
+        { rank: 193, name: "Kenneth Gainwell", posRank: "RB65" },
+        { rank: 194, name: "Justice Hill", posRank: "RB66" },
+        { rank: 195, name: "Elijah Mitchell", posRank: "RB67" },
+        { rank: 196, name: "A.J. Dillon", posRank: "RB68" },
+        { rank: 197, name: "Tim Patrick", posRank: "WR75" },
+        { rank: 198, name: "Elijah Moore", posRank: "WR76" },
+        { rank: 199, name: "Jalen McMillan", posRank: "WR77" },
+        { rank: 200, name: "Roman Wilson", posRank: "WR78" },
+      ];
+
+      const todoList = document.getElementById("todo-list");
+
+      players.forEach((player) => {
+        const listItem = document.createElement("li");
+        listItem.textContent = `${player.rank}. ${player.name} (${player.posRank})`;
+
+        // Add click event to toggle the completed class
+        listItem.addEventListener("click", () => {
+          listItem.classList.toggle("completed");
+        });
+
+        todoList.appendChild(listItem);
+      });
+    </script>
+  </body>
+</html>
