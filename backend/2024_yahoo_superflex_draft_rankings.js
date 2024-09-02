@@ -1,5 +1,6 @@
 [
   { rank: 1, name: "Josh Allen", posRank: "QB1" },
+  
   { rank: 2, name: "Lamar Jackson", posRank: "QB2" },
   { rank: 3, name: "Patrick Mahomes", posRank: "QB3" },
   { rank: 4, name: "Christian McCaffrey", posRank: "RB1" },
