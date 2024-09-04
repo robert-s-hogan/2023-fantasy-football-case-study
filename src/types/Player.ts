@@ -25,11 +25,17 @@ interface FumbleStats {
   lost: number;
 }
 
-// DetailedPlayer type with all stats fields
-export interface DetailedPlayer {
+// Add overallRank and positionRank to all players
+export interface PlayerBase {
   name: string;
   team: string;
   position: string;
+  overallRank?: number; // Add overallRank here
+  positionRank?: string; // Add position rank like RB1, WR2, etc.
+}
+
+// DetailedPlayer type with all stats fields
+export interface DetailedPlayer extends PlayerBase {
   games_played: number;
   bye_week: number;
   fan_points: number;
@@ -42,11 +48,8 @@ export interface DetailedPlayer {
 }
 
 // MinimalPlayer type for players without detailed stats
-export interface MinimalPlayer {
+export interface MinimalPlayer extends PlayerBase {
   rank?: number; // Optional draft rank
-  name: string;
-  team: string;
-  position: string;
   rank_difference?: number; // Optional field for rank difference
 }
 

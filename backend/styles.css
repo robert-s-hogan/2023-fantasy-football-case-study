@@ -1,0 +1,81 @@
+.QB {
+  background-color: #a1c4fd; /* Light Blue for Quarterbacks */
+  color: #000;
+}
+.RB {
+  background-color: #c8e6c9; /* Light Green for Running Backs */
+  color: #000;
+}
+.WR {
+  background-color: #ffcdd2; /* Light Coral for Wide Receivers */
+  color: #000;
+}
+.TE {
+  background-color: #d5b8f8; /* Light Purple for Tight Ends */
+  color: #000;
+}
+
+.hidden {
+  display: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  font-size: 1.2rem;
+}
+
+th {
+  background-color: #f4f4f4; /* Light Grey for table headers */
+  font-weight: bold;
+}
+
+tr.completed {
+  text-decoration: line-through;
+  background-color: #333; /* Dark grey for completed rows */
+  color: #fff;
+}
+
+button {
+  padding: 8px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #28a745; /* Green for active buttons */
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+button.completed {
+  background-color: grey;
+  cursor: not-allowed;
+  display: none;
+}
+
+.draft-btn {
+  background-color: #007bff; /* Blue for draft buttons */
+  color: white;
+  border-radius: 5px;
+}
+/* Initially hide the 'X' button */
+tr td .hide-btn {
+  display: none;
+}
+
+/* Show the 'X' button when hovering over the round header row */
+tr:hover td .hide-btn {
+  display: block;
+}
+
+/* Hide the entire row when necessary */
+.hidden {
+  display: none;
+}
