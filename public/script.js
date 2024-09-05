@@ -1214,9 +1214,10 @@ players.forEach((player, index) => {
   if (index % 8 === 0) {
     const roundRow = document.createElement("tr");
     roundRow.classList.add(`round-header-${round}`);
+    roundRow.style.backgroundColor = "#e0e0e0";
 
     // Create the "X" button for hiding
-    const hideButton = `<button class="hide-btn" data-round="${round}" style="margin: auto; height: 22px; background-color: transparent; color: black;">X</button>`;
+    const hideButton = `<button class="hide-btn" data-round="${round}" style="margin: auto; height: 22px; background-color: #e0e0e0 !important; color: black;">X</button>`;
 
     roundRow.innerHTML = `
       <td colspan="4" style="text-align:left; font-weight: bold; background-color: #e0e0e0;">
